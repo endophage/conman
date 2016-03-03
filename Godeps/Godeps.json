@@ -1,0 +1,57 @@
+{
+	"ImportPath": "github.com/endophage/conman",
+	"GoVersion": "go1.6",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.7.3",
+			"Rev": "55eb11d21d2a31a3cc93838241d04800f52e823d"
+		},
+		{
+			"ImportPath": "github.com/agl/ed25519",
+			"Rev": "d2b94fd789ea21d12fac1a4443dd3a3f79cda72c"
+		},
+		{
+			"ImportPath": "github.com/docker/distribution/uuid",
+			"Comment": "v2.0.0-353-gfed58bd",
+			"Rev": "fed58bd2d3c096055c0e69c2fb86c9a4965d1b8b"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/term",
+			"Comment": "v1.4.1-10635-g17156ba",
+			"Rev": "17156ba98ff8d29048b0f05f600fae9ccbd858a2"
+		},
+		{
+			"ImportPath": "github.com/docker/go/canonical/json",
+			"Comment": "v1.5.1-1-3-gc82d2d9",
+			"Rev": "c82d2d98a6942e0004eb0e8bf34b94077c3cc9e3"
+		},
+		{
+			"ImportPath": "github.com/docker/notary",
+			"Comment": "v0.2-29-g60fa90e",
+			"Rev": "60fa90e72c50a2e4670cc5e8ce4a3ab9613aea7b"
+		},
+		{
+			"ImportPath": "github.com/go-ini/ini",
+			"Comment": "v1.10.1",
+			"Rev": "776aa739ce9373377cd16f526cdf06cb4c89b40f"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/go-homedir",
+			"Rev": "df55a15e5ce646808815381b3db47a8c66ea62f4"
+		},
+		{
+			"ImportPath": "github.com/riyazdf/notary/client",
+			"Comment": "v0.1-584-g3a6c238",
+			"Rev": "3a6c238facfd490bb6b28a7a139d9b6f888a4e94"
+		},
+		{
+			"ImportPath": "github.com/riyazdf/notary/tuf/data",
+			"Comment": "v0.1-584-g3a6c238",
+			"Rev": "3a6c238facfd490bb6b28a7a139d9b6f888a4e94"
+		}
+	]
+}
