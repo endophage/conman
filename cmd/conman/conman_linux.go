@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/go-ini/ini"
 	"github.com/mitchellh/go-homedir"
@@ -53,15 +52,6 @@ func ParseCustomJSON(input []byte, expectedName string) (
 	section, err := cfg.GetSection("Desktop Entry")
 	if err != nil {
 		return nil, err
-	}
-
-	appNameKey, err := section.GetKey("Name")
-	if err != nil {
-		return nil, err
-	}
-
-	if strings.ToLower(appNameKey.Value()) != strings.ToLower(expectedName) {
-		return nil, fmt.Errorf("invalid application name %s", appNameKey.Value())
 	}
 
 	appIconKey, err := section.GetKey("Icon")
