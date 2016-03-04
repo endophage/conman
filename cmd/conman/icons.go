@@ -6,16 +6,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/riyazdf/notary/tuf/data"
 )
-
-// IconSizes is the sizes we want to translate Icons to
-var IconSizes = []int{16, 32, 48, 128, 256}
 
 // AllowedIconTypes are the allowed extensions for the icon
 var AllowedIconTypes = []string{"png", "svg", "ico", "jpg"}
@@ -66,8 +61,8 @@ func (iconInfo *IconInfo) UnmarshalJSON(input []byte) error {
 	return fmt.Errorf("invalid icon type: %s", extension)
 }
 
-// downloadIcon downloads the icon bytes as specified by IconInfo
-func (iconInfo *IconInfo) download() ([]byte, error) {
+// Download downloads the icon bytes as specified by IconInfo
+func (iconInfo *IconInfo) Download() ([]byte, error) {
 	req, err := http.NewRequest("GET", iconInfo.URL, nil)
 	if err != nil {
 		return nil, err
@@ -98,34 +93,4 @@ func (iconInfo *IconInfo) download() ([]byte, error) {
 	}
 
 	return body, nil
-}
-
-// Install downloads and installs the icons associated with this IconInfo
-func (iconInfo *IconInfo) Install(homedir string) error {
-	iconBytes, err := iconInfo.download()
-	if err != nil {
-		return err
-	}
-
-	location := filepath.Join(homedir, IconDirRelHome)
-	if err := os.MkdirAll(location, 0755); err != nil {
-		return err
-	}
-
-	iconFile, err := os.Create(filepath.Join(location,
-		fmt.Sprintf("%s.%s", iconInfo.Filename, iconInfo.Type)))
-	if err != nil {
-		return err
-	}
-
-	// nBytes, err := iconFile.Write(iconBytes)
-	_, err = iconFile.Write(iconBytes)
-	if err != nil {
-		return err
-	}
-	// if int64(nBytes) != iconInfo.Size {
-	// 	return fmt.Errorf("only able to write %v bytes of %v",
-	// 		nBytes, iconInfo.Size)
-	// }
-	return iconFile.Close()
 }
