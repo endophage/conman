@@ -133,7 +133,7 @@ type Target struct {
 type TargetWithRole struct {
 	Target
 	Role   string
-	Custom cjson.RawMessage
+	Custom []byte
 }
 
 // NewTarget is a helper method that returns a Target
@@ -403,7 +403,7 @@ func (r *NotaryRepository) ListTargets(roles ...string) ([]*TargetWithRole, erro
 					continue
 				}
 				targets[targetName] =
-					&TargetWithRole{Target: Target{Name: targetName, Hashes: targetMeta.Hashes, Length: targetMeta.Length}, Role: validRole.Name, Custom: targetMeta.Custom}
+					&TargetWithRole{Target: Target{Name: targetName, Hashes: targetMeta.Hashes, Length: targetMeta.Length}, Role: validRole.Name, Custom: []byte(targetMeta.Custom)}
 			}
 			return nil
 		}
@@ -457,7 +457,7 @@ func (r *NotaryRepository) GetTargetByName(name string, roles ...string) (*Targe
 		err = r.tufRepo.WalkTargets(name, role, getTargetVisitorFunc, skipRoles...)
 		// Check that we didn't error, and that we assigned to our target
 		if err == nil && foundTarget {
-			return &TargetWithRole{Target: Target{Name: name, Hashes: resultMeta.Hashes, Length: resultMeta.Length}, Role: resultRoleName, Custom: resultMeta.Custom}, nil
+			return &TargetWithRole{Target: Target{Name: name, Hashes: resultMeta.Hashes, Length: resultMeta.Length}, Role: resultRoleName, Custom: []byte(resultMeta.Custom)}, nil
 		}
 	}
 	return nil, fmt.Errorf("No trust data for %s", name)

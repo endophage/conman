@@ -45,13 +45,23 @@
 		},
 		{
 			"ImportPath": "github.com/riyazdf/notary/client",
-			"Comment": "v0.1-584-g3a6c238",
-			"Rev": "3a6c238facfd490bb6b28a7a139d9b6f888a4e94"
+			"Comment": "v0.1-586-g7c0e240",
+			"Rev": "7c0e2408f3a5f6f074275b2fd6d866fd77cccab6"
 		},
 		{
 			"ImportPath": "github.com/riyazdf/notary/tuf/data",
-			"Comment": "v0.1-584-g3a6c238",
-			"Rev": "3a6c238facfd490bb6b28a7a139d9b6f888a4e94"
+			"Comment": "v0.1-586-g7c0e240",
+			"Rev": "7c0e2408f3a5f6f074275b2fd6d866fd77cccab6"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.0-17-g089c718",
+			"Rev": "089c7181b8c728499929ff09b62d3fdd8df8adff"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/require",
+			"Comment": "v1.0-17-g089c718",
+			"Rev": "089c7181b8c728499929ff09b62d3fdd8df8adff"
 		}
 	]
 }
