@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"net/http"
@@ -52,7 +54,7 @@ type conManCustomTUF struct {
 
 // ParseCustomJSON parses the custom JSON from GetTargetByName into a
 // ConManCustomTUF object
-func ParseCustomJSON(input json.RawMessage, expectedName string) (
+func ParseCustomJSON(input []byte, expectedName string) (
 	*ConManAppInfo, error) {
 
 	cmct := &conManCustomTUF{}
@@ -100,7 +102,7 @@ func ParseCustomJSON(input json.RawMessage, expectedName string) (
 
 // LookupImageInfo takes a name and then uses notary to pull down the target
 // and extract the AppInfo
-func LookupImageInfo(homedir, appName string) (json.RawMessage, error) {
+func LookupImageInfo(homedir, appName string) ([]byte, error) {
 	repo, err := client.NewNotaryRepository(
 		filepath.Join(homedir, TrustDirRelHome),
 		ConManImage,
@@ -117,7 +119,17 @@ func LookupImageInfo(homedir, appName string) (json.RawMessage, error) {
 		return nil, fmt.Errorf("no such repository %s", appName)
 	}
 
-	return target.Custom, nil
+	// target.Custom will be a doubly quoted, doubly base64-encoded string, so
+	// de-quote and base64.decode twice
+	result := []byte(target.Custom)
+	for i := 0; i < 2; i++ {
+		unquoted := bytes.Trim(bytes.Trim(result, "\x00"), `"`)
+		result = make([]byte, base64.StdEncoding.DecodedLen(len(unquoted)))
+		if _, err = base64.StdEncoding.Decode(result, unquoted); err != nil {
+			return nil, err
+		}
+	}
+	return bytes.Trim(bytes.Trim(result, "\x00"), `"`), nil
 }
 
 // DownloadDockerImage does a docker pull to make sure the image exists first
@@ -156,7 +168,7 @@ func InstallDesktopAll(homedir, appName string, desktop *ini.File) error {
 
 // CreateApplication takes custom TUF information, parses it, and sets up the
 // application according to that TUF information
-func CreateApplication(homedir, appName string, customInfo json.RawMessage) error {
+func CreateApplication(homedir, appName string, customInfo []byte) error {
 	cmai, err := ParseCustomJSON(customInfo, appName)
 	if err != nil {
 		return err
@@ -197,7 +209,7 @@ func main() {
 		fmt.Println("Usage: conman <imagename>")
 		os.Exit(1)
 	}
-	if err := DownloadAndCreateApplication(args[0]); err != nil {
+	if err := DownloadAndCreateApplication(strings.TrimPrefix(args[0], "conman://")); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

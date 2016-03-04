@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/docker/go/canonical/json"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +25,7 @@ func TestCreateApplicationSanityCheckSuccess(t *testing.T) {
 	shasum := sha256.Sum256(fakeImageFile)
 	shasum64 := base64.StdEncoding.EncodeToString(shasum[:])
 
-	customInfo := json.RawMessage(fmt.Sprintf(`{
+	customInfo := []byte(fmt.Sprintf(`{
 		"desktop": "[Desktop Entry]\nType=Application\nName=Spotify\nIcon=spotify\nExec=\"docker run --rm -v /etc/localtime:/etc/localtime:ro -v $HOME/.spotify:/home/spotify -v /tmp/.X11-unix:/tmp/.X11-unix -v /run/user/$UID/pulse/native:/pulse -e DISPLAY=unix$DISPLAY --device /dev/snd:/dev/snd --name spotify spotify:latest\"\nTerminal=false",
 		"icon": {
 			"url": "%s/spotify.png",

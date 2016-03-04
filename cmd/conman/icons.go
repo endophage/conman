@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -19,7 +18,7 @@ import (
 var IconSizes = []int{16, 32, 48, 128, 256}
 
 // AllowedIconTypes are the allowed extensions for the icon
-var AllowedIconTypes = []string{"png", "svg", "ico"}
+var AllowedIconTypes = []string{"png", "svg", "ico", "jpg"}
 
 // IconInfo contains information about the Icon for a ConMan app
 type IconInfo struct {
@@ -41,7 +40,7 @@ func (iconInfo *IconInfo) UnmarshalJSON(input []byte) error {
 		return err
 	}
 
-	if len(i.Checksum) == 0 || i.Size < 1 {
+	if len(i.Checksum) == 0 {
 		return fmt.Errorf("invalid icon checksum information")
 	}
 
@@ -64,7 +63,6 @@ func (iconInfo *IconInfo) UnmarshalJSON(input []byte) error {
 			return nil
 		}
 	}
-
 	return fmt.Errorf("invalid icon type: %s", extension)
 }
 
@@ -84,12 +82,13 @@ func (iconInfo *IconInfo) download() ([]byte, error) {
 		return nil, fmt.Errorf("could not download icon at %s", iconInfo.URL)
 	}
 
-	if resp.ContentLength > iconInfo.Size {
-		return nil, fmt.Errorf("icon size too big")
-	}
+	// if resp.ContentLength > iconInfo.Size {
+	// 	return nil, fmt.Errorf("icon size too big")
+	// }
 
-	b := io.LimitReader(resp.Body, iconInfo.Size)
-	body, err := ioutil.ReadAll(b)
+	// // b := io.LimitReader(resp.Body, iconInfo.Size)
+	// body, err := ioutil.ReadAll(b)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -119,13 +118,14 @@ func (iconInfo *IconInfo) Install(homedir string) error {
 		return err
 	}
 
-	nBytes, err := iconFile.Write(iconBytes)
+	// nBytes, err := iconFile.Write(iconBytes)
+	_, err = iconFile.Write(iconBytes)
 	if err != nil {
 		return err
 	}
-	if int64(nBytes) != iconInfo.Size {
-		return fmt.Errorf("only able to write %v bytes of %v",
-			nBytes, iconInfo.Size)
-	}
+	// if int64(nBytes) != iconInfo.Size {
+	// 	return fmt.Errorf("only able to write %v bytes of %v",
+	// 		nBytes, iconInfo.Size)
+	// }
 	return iconFile.Close()
 }
