@@ -22,21 +22,17 @@ import (
 )
 
 // This is the first part of the script any ConMan app should run
-const DockerBashScript = `
+const OSXDockerScript = `
 #!/usr/bin/env bash
+
+export PATH=/usr/local/bin:$PATH
 
 # this is the address of the virtualbox host, which should be running xquartz
 HOST_DISPLAY_ADDR="$(ifconfig vboxnet0 inet | tail -n 1 | awk '{print $2}'):0"
 
 eval $(docker-machine env)
 export DOCKER_CONTENT_TRUST=1
-docker run -e DISPLAY=${HOST_DISPLAY_ADDR} %s
-`
-
-// This is the OSA script which executes the bash script
-const DockerOSAScript = `
-#!/usr/bin/env bash
-osascript -e 'tell application "Terminal" to do script "%s"'
+docker run --rm -e DISPLAY=${HOST_DISPLAY_ADDR} %s
 `
 
 // IconSizes is the sizes we want to translate Icons to
@@ -96,7 +92,6 @@ func ParseCustomJSON(input []byte, appName string) (*ConManAppInfo, error) {
 	cmai.ScriptName = appName
 	cmai.Icon.Filename = fmt.Sprintf("%s.icns", appName)
 	cmai.BundleName = AppBundleName(appName)
-	cmai.DockerCommand = "docker run conman/apps:spotify"
 
 	return cmai, nil
 }
@@ -170,30 +165,20 @@ func InstallShellScript(appDir string, cmai ConManAppInfo) error {
 		return err
 	}
 
-	bashFileName := fmt.Sprintf("%s.sh", cmai.ScriptName)
-
-	filesToContent := map[string]string{
-		bashFileName: fmt.Sprintf(DockerBashScript,
-			strings.TrimSpace(strings.TrimPrefix(cmai.DockerCommand, "docker run"))),
-		cmai.ScriptName: fmt.Sprintf(DockerOSAScript, filepath.Join(macOSDir, bashFileName)),
+	appFile, err := os.Create(filepath.Join(macOSDir, cmai.ScriptName))
+	if err != nil {
+		return err
 	}
-
-	for fileName, content := range filesToContent {
-		scriptFile, err := os.Create(filepath.Join(macOSDir, fileName))
-		if err != nil {
-			return err
-		}
-		if err := scriptFile.Chmod(0755); err != nil {
-			return err
-		}
-		defer scriptFile.Close()
-
-		if _, err = scriptFile.Write([]byte(strings.TrimSpace(content) + "\n")); err != nil {
-			return err
-		}
+	if err := appFile.Chmod(0755); err != nil {
+		return err
 	}
+	defer appFile.Close()
 
-	return nil
+	script := fmt.Sprintf(
+		strings.TrimSpace(OSXDockerScript),
+		strings.TrimSpace(strings.TrimPrefix(cmai.DockerCommand, "docker run")))
+	_, err = appFile.Write([]byte(script + "\n"))
+	return err
 }
 
 // CreateApplication takes custom TUF information, parses it, and sets up the
