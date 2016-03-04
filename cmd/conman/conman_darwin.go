@@ -9,7 +9,6 @@
 package main
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -20,8 +19,25 @@ import (
 
 	"github.com/DHowett/go-plist"
 	"github.com/mitchellh/go-homedir"
-	"github.com/riyazdf/notary/tuf/data"
 )
+
+// This is the first part of the script any ConMan app should run
+const DockerBashScript = `
+#!/usr/bin/env bash
+
+# this is the address of the virtualbox host, which should be running xquartz
+HOST_DISPLAY_ADDR="$(ifconfig vboxnet0 inet | tail -n 1 | awk '{print $2}'):0"
+
+eval $(docker-machine env)
+export DOCKER_CONTENT_TRUST=1
+docker run -e DISPLAY=${HOST_DISPLAY_ADDR} %s
+`
+
+// This is the OSA script which executes the bash script
+const DockerOSAScript = `
+#!/usr/bin/env bash
+osascript -e 'tell application "Terminal" to do script "%s"'
+`
 
 // IconSizes is the sizes we want to translate Icons to
 var IconSizes = []int{16, 32, 64, 128, 256, 512}
@@ -29,10 +45,10 @@ var IconSizes = []int{16, 32, 64, 128, 256, 512}
 // ConManAppInfo stores information about how to set up a docker app with Gnome
 // desktop
 type ConManAppInfo struct {
-	ScriptName string   `json:"-"`
-	BundleName string   `json:"-"`
-	Script     string   `json:"script"`
-	Icon       IconInfo `json:"icon"`
+	ScriptName    string   `json:"-"`
+	BundleName    string   `json:"-"`
+	DockerCommand string   `json:"cmd"`
+	Icon          IconInfo `json:"icon"`
 }
 
 // AppBundlePlist is the serialization of the app plist in Mac OS
@@ -47,15 +63,15 @@ type AppBundlePlist struct {
 	BundleInfoNumber  string `plist:"CFBundleInfoDictionaryVersion"`
 }
 
-// NewPlist returns a Plist object with a bunch of default values
-func NewPlist(executable, bundleName string) AppBundlePlist {
-	return AppBundlePlist{
-		BundleExecutable:  executable,
-		BundleIcon:        "Icon.icns",
-		BundleName:        bundleName,
+// NewPlist returns a Plist object with a bunch of default values to be encoded
+func NewPlist(cmai ConManAppInfo) *AppBundlePlist {
+	return &AppBundlePlist{
+		BundleExecutable:  cmai.ScriptName,
+		BundleIcon:        cmai.Icon.Filename,
+		BundleName:        cmai.BundleName,
 		MacMinVersion:     "10.11.0",
 		BundleSignature:   "????",
-		BundleTypeIcon:    "Icon.icns",
+		BundleTypeIcon:    cmai.Icon.Filename,
 		BundlePackageType: "APPL",
 		BundleInfoNumber:  "6.0",
 	}
@@ -78,21 +94,9 @@ func ParseCustomJSON(input []byte, appName string) (*ConManAppInfo, error) {
 		return nil, err
 	}
 	cmai.ScriptName = appName
-	// cmai.Icon.Filename = appName
-
-	// TODO: sips doesn't work on jpgs, so use PNG for the icon
-	// TODO: some kind of script
-	checksum, _ := hex.DecodeString("0a13792ba0e495e800553446dcd061c5e38d925f962e8d5c3e60505b0be156ce")
-	cmai.Icon = IconInfo{
-		URL:      "http://pre12.deviantart.net/ce8b/th/pre/f/2013/197/b/8/spotify_retina_icon_by_packrobottom-d6dqo1g.png",
-		Checksum: data.Hashes{"sha256": checksum},
-		Size:     118559,
-		Type:     "png",
-		Filename: appName,
-	}
-	cmai.Script = "#!/bin/bash\nopen -a Calculator"
-
+	cmai.Icon.Filename = fmt.Sprintf("%s.icns", appName)
 	cmai.BundleName = AppBundleName(appName)
+	cmai.DockerCommand = "docker run conman/apps:spotify"
 
 	return cmai, nil
 }
@@ -149,7 +153,7 @@ func InstallIcon(appDir string, i IconInfo) error {
 		return err
 	}
 
-	icnsFile := filepath.Join(resourcesDir, "Icon.icns")
+	icnsFile := filepath.Join(resourcesDir, i.Filename)
 
 	cmd := exec.Command("iconutil", "-c", "icns", "-o", icnsFile, iconSetDir)
 	output, err := cmd.CombinedOutput()
@@ -166,17 +170,30 @@ func InstallShellScript(appDir string, cmai ConManAppInfo) error {
 		return err
 	}
 
-	appFile, err := os.Create(filepath.Join(macOSDir, cmai.ScriptName))
-	if err != nil {
-		return err
-	}
-	if err := appFile.Chmod(0755); err != nil {
-		return err
-	}
-	defer appFile.Close()
+	bashFileName := fmt.Sprintf("%s.sh", cmai.ScriptName)
 
-	_, err = appFile.Write([]byte(cmai.Script))
-	return err
+	filesToContent := map[string]string{
+		bashFileName: fmt.Sprintf(DockerBashScript,
+			strings.TrimSpace(strings.TrimPrefix(cmai.DockerCommand, "docker run"))),
+		cmai.ScriptName: fmt.Sprintf(DockerOSAScript, filepath.Join(macOSDir, bashFileName)),
+	}
+
+	for fileName, content := range filesToContent {
+		scriptFile, err := os.Create(filepath.Join(macOSDir, fileName))
+		if err != nil {
+			return err
+		}
+		if err := scriptFile.Chmod(0755); err != nil {
+			return err
+		}
+		defer scriptFile.Close()
+
+		if _, err = scriptFile.Write([]byte(strings.TrimSpace(content) + "\n")); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // CreateApplication takes custom TUF information, parses it, and sets up the
@@ -193,8 +210,6 @@ func CreateApplication(homedir, appName string, customInfo []byte) error {
 		return err
 	}
 
-	plistStuff := NewPlist(cmai.ScriptName, cmai.BundleName)
-
 	plistFile, err := os.Create(filepath.Join(appDir, "Info.plist"))
 	if err != nil {
 		return err
@@ -202,7 +217,7 @@ func CreateApplication(homedir, appName string, customInfo []byte) error {
 
 	encoder := plist.NewEncoder(plistFile)
 	encoder.Indent("  ")
-	if err := encoder.Encode(&plistStuff); err != nil {
+	if err := encoder.Encode(NewPlist(*cmai)); err != nil {
 		return err
 	}
 
@@ -222,9 +237,9 @@ func DownloadAndCreateApplication(appName string) error {
 		return fmt.Errorf("unable to figure out your home directory")
 	}
 
-	// if err := DownloadDockerImage(appName); err != nil {
-	// 	return err
-	// }
+	if err := DownloadDockerImage(appName); err != nil {
+		return err
+	}
 	custom, err := LookupImageInfo(homedir, appName)
 	if err != nil {
 		return err

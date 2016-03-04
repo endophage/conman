@@ -13,7 +13,7 @@ import (
 )
 
 // AllowedIconTypes are the allowed extensions for the icon
-var AllowedIconTypes = []string{"png", "svg", "ico", "jpg"}
+var AllowedIconTypes = []string{"png"}
 
 // IconInfo contains information about the Icon for a ConMan app
 type IconInfo struct {
