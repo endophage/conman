@@ -1,5 +1,5 @@
 {
-	"desktop":"[Desktop Entry]\nType=Application\nName=Spotify\nIcon=spotify\nExec=/bin/sh -c \"docker run --rm -v /etc/localtime:/etc/localtime:ro -v $HOME/.spotify:/home/spotify -v /tmp/.X11-unix:/tmp/.X11-unix -v /run/user/$UID/pulse/native:/pulse -e DISPLAY=unix$DISPLAY --name spotify endophage/apps:spotify\"Terminal=false",
+	"desktop":"[Desktop Entry]\nType=Application\nName=Spotify\nIcon=spotify\nExec=/bin/sh -c \"docker run --rm -v /etc/localtime:/etc/localtime:ro -v $HOME/.spotify:/home/spotify -v /tmp/.X11-unix:/tmp/.X11-unix -v /run/user/$UID/pulse/native:/pulse -e DISPLAY=unix$DISPLAY --name spotify conman/apps:spotify\"Terminal=false",
 	"icon":{
 		"url":"https://i.imgur.com/9XQGXs4.jpg",
 		"checksum":{

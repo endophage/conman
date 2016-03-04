@@ -1,5 +1,5 @@
 {
-	"desktop":"[Desktop Entry]\nType=Application\nName=Atom\nIcon=atom\nExec=/bin/sh -c \"docker run --rm -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY -v $HOME/go:/home/atom/go --name=atom endophage/apps:atom\"\nTerminal=false",
+	"desktop":"[Desktop Entry]\nType=Application\nName=Atom\nIcon=atom\nExec=/bin/sh -c \"docker run --rm -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY -v $HOME/go:/home/atom/go --name=atom conman/apps:atom\"\nTerminal=false",
 	"icon":{
 		"url":"https://floobits.com/static/images/editors/atom.png",
 		"checksum":{

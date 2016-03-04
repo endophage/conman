@@ -1,0 +1,10 @@
+{
+	"desktop":"[Desktop Entry]\nType=Application\nName=CheeseContainer\nIcon=cheese\nExec=/bin/sh -c \"docker run -v /etc:/etc -v $HOME/Pictures/Webcam:$HOME/Pictures/Webcam -v /lib64:/lib64 -v /run:/run -v /usr:/usr --device /dev/video0 --rm -e DISPLAY=unix$DISPLAY --user=$USER -v /tmp/.X11-unix:/tmp/.X11-unix --name cheese base:latest cheese\"\nTerminal=false",
+	"icon":{
+		"url":"http://i992.photobucket.com/albums/af42/webtreatsetc/Business%20Food%20Beverage%20Sports%20Hobbies%20Transport/125173-matte-white-square-icon-food-beverage-food-cheese-sc44.png",
+		"checksum":{
+			"sha256":"vv9ikDXJG2IB34wnMvkebPjZNbzuLVh4Az4qB8ICn8c="
+		}
+	},
+	"mimetypes":[]
+}
