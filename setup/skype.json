@@ -1,0 +1,10 @@
+{
+	"desktop":"[Desktop Entry]\nType=Application\nName=Skype\nIcon=skype\nExec=/bin/sh -c \"docker run --rm -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/.Skype:/home/skype/.Skype -v /run/user/$UID/pulse/native:/pulse -e DISPLAY=unix$DISPLAY --device /dev/video0 --name=skype endophage/apps:skype\"\nTerminal=false",
+	"icon":{
+		"url":"http://www.icreatemagazine.com/wp-content/uploads/2014/03/Skype.png",
+		"checksum":{
+			"sha256":"ah0ERxRZOasywBCq2tA3TLyD/h3Qe/xjvmOteYQVfbw="
+		}
+	},
+	"mimetypes":[]
+}
