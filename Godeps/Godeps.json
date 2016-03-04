@@ -6,6 +6,10 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/DHowett/go-plist",
+			"Rev": "a34fbb33e60256707d230f730e60f75946fd2d7c"
+		},
+		{
 			"ImportPath": "github.com/Sirupsen/logrus",
 			"Comment": "v0.7.3",
 			"Rev": "55eb11d21d2a31a3cc93838241d04800f52e823d"
@@ -35,11 +39,6 @@
 			"Rev": "60fa90e72c50a2e4670cc5e8ce4a3ab9613aea7b"
 		},
 		{
-			"ImportPath": "github.com/go-ini/ini",
-			"Comment": "v1.10.1",
-			"Rev": "776aa739ce9373377cd16f526cdf06cb4c89b40f"
-		},
-		{
 			"ImportPath": "github.com/mitchellh/go-homedir",
 			"Rev": "df55a15e5ce646808815381b3db47a8c66ea62f4"
 		},
@@ -52,16 +51,6 @@
 			"ImportPath": "github.com/riyazdf/notary/tuf/data",
 			"Comment": "v0.1-586-g7c0e240",
 			"Rev": "7c0e2408f3a5f6f074275b2fd6d866fd77cccab6"
-		},
-		{
-			"ImportPath": "github.com/stretchr/testify/assert",
-			"Comment": "v1.0-17-g089c718",
-			"Rev": "089c7181b8c728499929ff09b62d3fdd8df8adff"
-		},
-		{
-			"ImportPath": "github.com/stretchr/testify/require",
-			"Comment": "v1.0-17-g089c718",
-			"Rev": "089c7181b8c728499929ff09b62d3fdd8df8adff"
 		}
 	]
 }
