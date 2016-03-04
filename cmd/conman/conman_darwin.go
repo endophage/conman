@@ -89,6 +89,7 @@ func ParseCustomJSON(input []byte, appName string) (*ConManAppInfo, error) {
 	if err := json.Unmarshal(input, cmai); err != nil {
 		return nil, err
 	}
+	cmai.DockerCommand = fmt.Sprintf("docker run %s:%s", ConManImage, appName)
 	cmai.ScriptName = appName
 	cmai.Icon.Filename = fmt.Sprintf("%s.icns", appName)
 	cmai.BundleName = AppBundleName(appName)
